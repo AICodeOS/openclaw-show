@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw - 你的私人 AI 助手平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #00d9ff;
+            --secondary: #7b2ff7;
+            --accent: #ff006e;
+            --bg-dark: #0a0e27;
+            --bg-darker: #050814;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --card-bg: rgba(15, 23, 42, 0.8);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-darker);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 80%, rgba(123, 47, 247, 0.1) 0%, transparent 50%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 80px rgba(0, 217, 255, 0.5);
+        }
+
+        .domain {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 3rem;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 217, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: var(--bg-dark);
+            transform: translateY(-3px);
+        }
+
+        /* Section */
+        section {
+            padding: 6rem 0;
+            position: relative;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 4rem;
+        }
+
+        /* Introduction */
+        .intro-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .intro-content p {
+            font-size: 1.2rem;
+            line-height: 2;
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .intro-highlights {
+            display: flex;
+            gap: 2rem;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .highlight-item {
+            flex: 1;
+            min-width: 200px;
+            padding: 1.5rem;
+            background: var(--card-bg);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .highlight-item h3 {
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 217, 255, 0.1);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 40px rgba(0, 217, 255, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Platforms */
+        .platforms-grid {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 3rem;
+        }
+
+        .platform-item {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 217, 255, 0.1);
+            min-width: 150px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .platform-item:hover {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .platform-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Channels */
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .channel-item {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 217, 255, 0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .channel-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        /* Architecture */
+        .architecture-diagram {
+            background: var(--card-bg);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            margin-top: 3rem;
+            text-align: center;
+        }
+
+        .arch-layer {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(0, 217, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+        }
+
+        .arch-arrow {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 1rem 0;
+        }
+
+        /* Quick Start */
+        .quick-start-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .install-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 1rem 2rem;
+            background: var(--card-bg);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            margin: 1.5rem 0;
+            position: relative;
+        }
+
+        .code-block code {
+            color: var(--primary);
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 1.1rem;
+        }
+
+        .steps {
+            margin-top: 3rem;
+        }
+
+        .step {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+        }
+
+        /* Ecosystem */
+        .ecosystem-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .category-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(0, 217, 255, 0.1);
+        }
+
+        .category-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .plugin-list {
+            list-style: none;
+        }
+
+        .plugin-list li {
+            padding: 0.5rem 0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .plugin-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-darker);
+            padding: 3rem 0;
+            text-align: center;
+            border-top: 1px solid rgba(0, 217, 255, 0.1);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            .hero h2 {
+                font-size: 1.8rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .step {
+                flex-direction: column;
+            }
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1 class="logo">OpenClaw</h1>
+            <div class="domain">openclaw.show</div>
+            <h2>你的私人 AI 助手平台</h2>
+            <p>本地优先 · 隐私可控 · 多渠道接入 · 随时随地响应</p>
+            <div class="cta-buttons">
+                <a href="#quick-start" class="btn btn-primary">快速开始</a>
+                <a href="https://github.com/openclaw/openclaw" class="btn btn-secondary" target="_blank">GitHub</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Introduction -->
+    <section id="introduction">
+        <div class="container">
+            <h2 class="section-title">什么是 OpenClaw？</h2>
+            <p class="section-subtitle">自托管的智能助手，运行在你的设备上</p>
+            <div class="intro-content">
+                <p>OpenClaw 是一个开源的个人 AI 助手平台，让你在自己的设备上运行 AI 助手，通过你日常使用的消息应用与它交互。</p>
+                <p>无需依赖云服务，数据完全由你掌控。支持 WhatsApp、Telegram、Discord、Slack、iMessage 等 10+ 个消息渠道。</p>
+                <div class="intro-highlights">
+                    <div class="highlight-item">
+                        <h3>🔒 隐私优先</h3>
+                        <p>本地运行，数据不离开你的设备</p>
+                    </div>
+                    <div class="highlight-item">
+                        <h3>⚡ 快速响应</h3>
+                        <p>无需等待云端，即时处理</p>
+                    </div>
+                    <div class="highlight-item">
+                        <h3>🔌 可扩展</h3>
+                        <p>30+ 官方插件，支持自定义</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features">
+        <div class="container">
+            <h2 class="section-title">核心功能</h2>
+            <p class="section-subtitle">强大而灵活的 AI 助手能力</p>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3>多渠道接入</h3>
+                    <p>支持 WhatsApp、Telegram、Discord、Slack、Signal、iMessage 等 10+ 个消息平台，一个助手，多处响应。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>浏览器控制</h3>
+                    <p>内置浏览器自动化能力，AI 可以帮你浏览网页、提取信息、执行操作。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Canvas 工作区</h3>
+                    <p>可视化工作空间，支持图表、代码、文档等多种内容的实时协作。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🎤</div>
+                    <h3>语音交互</h3>
+                    <p>支持语音唤醒、语音输入和语音回复，解放双手，自然对话。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧩</div>
+                    <h3>插件生态</h3>
+                    <p>30+ 官方插件，涵盖消息渠道、记忆系统、工具集成等，支持自定义开发。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⏰</div>
+                    <h3>定时任务</h3>
+                    <p>支持 Cron 定时任务，让 AI 助手主动为你工作，定期提醒、自动化流程。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Platforms -->
+    <section id="platforms">
+        <div class="container">
+            <h2 class="section-title">支持平台</h2>
+            <p class="section-subtitle">跨平台运行，随处可用</p>
+            <div class="platforms-grid">
+                <div class="platform-item">
+                    <div class="platform-icon">🍎</div>
+                    <h3>macOS</h3>
+                    <p>菜单栏应用</p>
+                </div>
+                <div class="platform-item">
+                    <div class="platform-icon">📱</div>
+                    <h3>iOS</h3>
+                    <p>原生应用</p>
+                </div>
+                <div class="platform-item">
+                    <div class="platform-icon">🤖</div>
+                    <h3>Android</h3>
+                    <p>原生应用</p>
+                </div>
+                <div class="platform-item">
+                    <div class="platform-icon">🐧</div>
+                    <h3>Linux</h3>
+                    <p>CLI + 服务</p>
+                </div>
+                <div class="platform-item">
+                    <div class="platform-icon">🪟</div>
+                    <h3>Windows</h3>
+                    <p>WSL2 支持</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Channels -->
+    <section id="channels">
+        <div class="container">
+            <h2 class="section-title">消息渠道</h2>
+            <p class="section-subtitle">在你喜欢的平台上与 AI 对话</p>
+            <div class="channels-grid">
+                <div class="channel-item">📱 WhatsApp</div>
+                <div class="channel-item">✈️ Telegram</div>
+                <div class="channel-item">🎮 Discord</div>
+                <div class="channel-item">💼 Slack</div>
+                <div class="channel-item">🔒 Signal</div>
+                <div class="channel-item">💬 iMessage</div>
+                <div class="channel-item">💬 Google Chat</div>
+                <div class="channel-item">👥 Microsoft Teams</div>
+                <div class="channel-item">🔷 Matrix</div>
+                <div class="channel-item">📊 Mattermost</div>
+                <div class="channel-item">🟢 LINE</div>
+                <div class="channel-item">🎥 Twitch</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture -->
+    <section id="architecture">
+        <div class="container">
+            <h2 class="section-title">架构概览</h2>
+            <p class="section-subtitle">简单而强大的设计</p>
+            <div class="architecture-diagram">
+                <div class="arch-layer">
+                    <h3>消息渠道层</h3>
+                    <p>WhatsApp · Telegram · Discord · Slack · Signal · iMessage ...</p>
+                </div>
+                <div class="arch-arrow">↓</div>
+                <div class="arch-layer">
+                    <h3>网关控制中心 (Gateway)</h3>
+                    <p>WebSocket 服务 · 消息路由 · 会话管理 · 事件分发</p>
+                </div>
+                <div class="arch-arrow">↓</div>
+                <div class="arch-layer">
+                    <h3>AI Agent 运行时</h3>
+                    <p>工具执行 · 上下文管理 · 流式响应 · 插件加载</p>
+                </div>
+                <div class="arch-arrow">↓</div>
+                <div class="arch-layer">
+                    <h3>能力层</h3>
+                    <p>浏览器控制 · Canvas 工作区 · 设备操作 · 定时任务</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start -->
+    <section id="quick-start">
+        <div class="container">
+            <h2 class="section-title">快速开始</h2>
+            <p class="section-subtitle">几分钟内启动你的 AI 助手</p>
+            <div class="quick-start-content">
+                <div class="install-tabs">
+                    <div class="tab-btn active">macOS</div>
+                </div>
+
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h3>安装 OpenClaw</h3>
+                            <div class="code-block">
+                                <code>npm install -g openclaw@latest</code>
+                            </div>
+                            <p>或者下载 macOS 应用：从 GitHub Releases 下载 .dmg 文件</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h3>配置 AI 提供商</h3>
+                            <div class="code-block">
+                                <code>openclaw login</code>
+                            </div>
+                            <p>支持 Anthropic Claude、OpenAI、Google Gemini 等多个 AI 提供商</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h3>启动网关</h3>
+                            <div class="code-block">
+                                <code>openclaw gateway run</code>
+                            </div>
+                            <p>网关将在后台运行，管理所有消息渠道和 AI 会话</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h3>连接消息渠道</h3>
+                            <div class="code-block">
+                                <code>openclaw channels add telegram</code>
+                            </div>
+                            <p>按照引导配置你想使用的消息平台，开始与 AI 对话</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <h3>开始对话</h3>
+                            <p>在你配置的消息应用中发送消息，AI 助手将立即响应！</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ecosystem -->
+    <section id="ecosystem">
+        <div class="container">
+            <h2 class="section-title">插件生态</h2>
+            <p class="section-subtitle">30+ 官方插件，持续扩展</p>
+            <div class="ecosystem-categories">
+                <div class="category-card">
+                    <h3>📱 消息渠道</h3>
+                    <ul class="plugin-list">
+                        <li>BlueBubbles (iMessage)</li>
+                        <li>Microsoft Teams</li>
+                        <li>Matrix</li>
+                        <li>Mattermost</li>
+                        <li>LINE</li>
+                        <li>Nextcloud Talk</li>
+                        <li>Nostr</li>
+                        <li>Twitch</li>
+                        <li>Zalo</li>
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <h3>🧠 记忆系统</h3>
+                    <ul class="plugin-list">
+                        <li>memory-core</li>
+                        <li>memory-lancedb</li>
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <h3>🔐 认证集成</h3>
+                    <ul class="plugin-list">
+                        <li>Google Antigravity Auth</li>
+                        <li>Google Gemini CLI Auth</li>
+                        <li>Qwen Portal Auth</li>
+                        <li>Copilot Proxy</li>
+                    </ul>
+                </div>
+                <div class="category-card">
+                    <h3>🛠️ 工具扩展</h3>
+                    <ul class="plugin-list">
+                        <li>voice-call</li>
+                        <li>llm-task</li>
+                        <li>lobster</li>
+                        <li>open-prose</li>
+                        <li>diagnostics-otel</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://github.com/openclaw/openclaw" target="_blank">GitHub</a>
+                <a href="https://docs.openclaw.ai" target="_blank">文档</a>
+                <a href="https://github.com/openclaw/openclaw/issues" target="_blank">问题反馈</a>
+            </div>
+            <p style="color: var(--text-secondary);">© 2025 OpenClaw · 开源 AI 助手平台</p>
+        </div>
+    </footer>
+</body>
+</html>
